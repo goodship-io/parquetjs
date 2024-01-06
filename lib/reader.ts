@@ -874,9 +874,13 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
     };
   }
 
-  return decodeValues(opts.column!.primitiveType!, opts.column!.encoding!, dictCursor, (header.dictionary_page_header!).num_values, opts)
-    .map((d:Array<unknown>) => d.toString());
-
+  return decodeValues(
+    opts.column!.primitiveType!,
+    opts.column!.encoding!,
+    dictCursor,
+    (header.dictionary_page_header!).num_values,
+    { ...opts, ...opts.column }
+  )
 }
 
 async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {
