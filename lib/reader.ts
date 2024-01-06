@@ -881,8 +881,6 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
     (header.dictionary_page_header!).num_values,
     { ...opts, ...opts.column }
   )
-    .map((d:Array<unknown>) => d.toString());
-
 }
 
 async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {
