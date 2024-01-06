@@ -146,19 +146,19 @@ function encodeValues_INT96(values: Array<number>) {
   return buf;
 }
 
-function decodeValues_INT96(cursor: Cursor, count: number) {
+function decodeValues_INT96(cursor: Cursor, count: number, opts: Options) {
   let values = [];
-
+  
   for (let i = 0; i < count; ++i) {
-    const low = INT53.readInt64LE(cursor.buffer, cursor.offset);
-    const high = cursor.buffer.readUInt32LE(cursor.offset + 8);
+    // Read the low and high parts as BigInts
+    const lowBigInt = BigInt(INT53.readInt64LE(cursor.buffer, cursor.offset));
+    const highBigInt = BigInt(cursor.buffer.readUInt32LE(cursor.offset + 8)) << BigInt(64);
 
-    if (high === 0xffffffff) {
-      values.push(~-low + 1); // truncate to 64 actual precision
-    } else {
-      values.push(low); // truncate to 64 actual precision
-    }
+    // Combine the low and high parts
+    const value = lowBigInt | highBigInt;
 
+    values.push(value);
+    
     cursor.offset += 12;
   }
 
@@ -238,6 +238,24 @@ function decodeValues_BYTE_ARRAY(cursor: Cursor, count: number) {
   return values;
 }
 
+function byteArrayToDecimal(bytes: Uint8Array, scale: number): string {
+  // Convert the byte array to a big integer
+  let bigInteger = BigInt(0);
+  for (let byte of bytes) {
+      bigInteger = (bigInteger << BigInt(8)) + BigInt(byte);
+  }
+
+  // Calculate the scale factor as a BigInt
+  const factor = BigInt(Math.pow(10, scale));
+
+  // Perform the division and modulus operations in BigInt
+  const integerPart = bigInteger / factor;
+  const fractionalPart = bigInteger % factor;
+
+  // Construct the decimal string
+  return `${integerPart}.${fractionalPart.toString().padStart(scale, '0')}`;
+}
+
 function encodeValues_FIXED_LEN_BYTE_ARRAY(
   values: Array<Uint8Array>,
   opts: Options
@@ -263,12 +281,23 @@ function decodeValues_FIXED_LEN_BYTE_ARRAY(
   count: number,
   opts: Options
 ) {
-  let values = [];
 
   if (!opts.typeLength) {
     throw "missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)";
   }
 
+  const isDecimal = opts?.originalType === 'DECIMAL' || opts?.column?.originalType === 'DECIMAL';
+  if (isDecimal) {
+    const returnedValues: Array<string> = [];
+    for (let i = 0; i < count; i++) {
+      const buffer = cursor.buffer.subarray(cursor.offset, cursor.offset + opts.typeLength);
+      returnedValues[i] = byteArrayToDecimal(buffer, opts.scale ?? 0);
+      cursor.offset += opts.typeLength;
+    }
+    return returnedValues;
+  }
+
+  const values = [];
   for (let i = 0; i < count; ++i) {
     values.push(
       cursor.buffer.slice(cursor.offset, cursor.offset + opts.typeLength)
@@ -336,7 +365,7 @@ export const decodeValues = function (
       return decodeValues_INT64(cursor, count, opts);
 
     case "INT96":
-      return decodeValues_INT96(cursor, count);
+      return decodeValues_INT96(cursor, count, opts);
 
     case "FLOAT":
       return decodeValues_FLOAT(cursor, count);
