@@ -1,0 +1,21 @@
+/// <reference types="node" />
+import parquet_thrift from "../../gen-nodejs/parquet_types";
+import SplitBlockBloomFilter from "../bloom/sbbf";
+import { Block } from "../declare";
+import Int64 from 'node-int64';
+export type createSBBFParams = {
+    numFilterBytes?: number;
+    falsePositiveRate?: number;
+    numDistinct?: number;
+    column?: any;
+};
+export declare const createSBBF: (params: createSBBFParams) => SplitBlockBloomFilter;
+export declare const serializeFilterHeaders: (numberOfBytes: number) => Buffer;
+type serializeFilterDataParams = {
+    filterBlocks: Array<Block>;
+    filterByteSize: number;
+};
+export declare const serializeFilterData: (params: serializeFilterDataParams) => Buffer;
+export declare const setFilterOffset: (column: parquet_thrift.ColumnChunk, offset: Int64) => void;
+export declare const getSerializedBloomFilterData: (splitBlockBloomFilter: InstanceType<typeof SplitBlockBloomFilter>) => Buffer;
+export {};
