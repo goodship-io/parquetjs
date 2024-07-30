@@ -34,7 +34,7 @@ class BufferReader {
             return;
         this.queue = [];
         queue.sort((a, b) => a.offset - b.offset);
-        var subqueue = [];
+        let subqueue = [];
         const readSubqueue = async () => {
             if (!subqueue.length) {
                 return;
@@ -46,14 +46,14 @@ class BufferReader {
             const finish = lastElement.offset + lastElement.length;
             const buffer = await this.envelopeReader.readFn(start, finish - start);
             processQueue.forEach(async (d) => {
-                d.resolve(buffer.slice(d.offset - start, d.offset + d.length - start));
+                d.resolve(buffer.subarray(d.offset - start, d.offset + d.length - start));
             });
         };
         queue.forEach((d, i) => {
             const prev = queue[i - 1];
-            if (!prev || (d.offset - (prev.offset + prev.length)) < this.maxSpan) {
+            if (!prev || d.offset - (prev.offset + prev.length) < this.maxSpan) {
                 subqueue.push(d);
-                if ((d.offset + d.length) - subqueue[0].offset > this.maxLength) {
+                if (d.offset + d.length - subqueue[0].offset > this.maxLength) {
                     readSubqueue();
                 }
             }
@@ -66,4 +66,3 @@ class BufferReader {
     }
 }
 exports.default = BufferReader;
-;

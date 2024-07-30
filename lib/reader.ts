@@ -812,7 +812,7 @@ function decodeValues(
   opts: Options | { bitWidth: number }
 ) {
   if (!(encoding in parquet_codec)) {
-    throw 'invalid encoding: ' + encoding;
+      throw 'invalid encoding: ' + encoding + JSON.stringify(parquet_codec);
   }
 
   return parquet_codec[encoding].decodeValues(type, cursor, count, opts as Options);
@@ -981,7 +981,7 @@ async function decodeDictionaryPage(cursor: Cursor, header: parquet_thrift.PageH
     dictCursor,
     header.dictionary_page_header!.num_values,
     { ...opts, ...opts.column }
-  ).map((d: unknown[]) => d.toString());
+  )
 }
 
 async function decodeDataPage(cursor: Cursor, header: parquet_thrift.PageHeader, opts: Options) {

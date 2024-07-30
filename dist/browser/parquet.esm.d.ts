@@ -1,1 +1,1 @@
-export * from "../parquet";
+export * from '../parquet';

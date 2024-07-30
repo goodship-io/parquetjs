@@ -1,12 +1,9 @@
-/// <reference types="node" />
-/// <reference types="node" />
-/// <reference types="node-int64" />
-import thrift from "thrift";
+import thrift from 'thrift';
 import fs, { WriteStream } from 'fs';
 import * as parquet_thrift from '../gen-nodejs/parquet_types';
 import { FileMetaDataExt, WriterOptions } from './declare';
-import { Int64 } from "thrift";
-export type WriteStreamMinimal = Pick<WriteStream, "write" | "end">;
+import { Int64 } from 'thrift';
+export type WriteStreamMinimal = Pick<WriteStream, 'write' | 'end'>;
 type Enums = typeof parquet_thrift.Encoding | typeof parquet_thrift.FieldRepetitionType | typeof parquet_thrift.Type | typeof parquet_thrift.CompressionCodec | typeof parquet_thrift.PageType | typeof parquet_thrift.ConvertedType;
 type ThriftObject = FileMetaDataExt | parquet_thrift.PageHeader | parquet_thrift.ColumnMetaData | parquet_thrift.BloomFilterHeader | parquet_thrift.OffsetIndex | parquet_thrift.ColumnIndex | FileMetaDataExt;
 /**
@@ -29,6 +26,6 @@ export declare const fclose: (fd: number) => Promise<unknown>;
 export declare const oswrite: (os: WriteStreamMinimal, buf: Buffer) => Promise<unknown>;
 export declare const osend: (os: WriteStreamMinimal) => Promise<unknown>;
 export declare const osopen: (path: string | Buffer | URL, opts?: WriterOptions) => Promise<WriteStream>;
-export declare const fieldIndexOf: (arr: Array<Array<unknown>>, elem: Array<unknown>) => number;
+export declare const fieldIndexOf: (arr: unknown[][], elem: unknown[]) => number;
 export declare const cloneInteger: (int: Int64) => thrift.Int64;
 export {};

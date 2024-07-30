@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import Int64 from 'node-int64';
 import parquet_thrift from '../gen-nodejs/parquet_types';
 import * as parquet_shredder from './shred';
@@ -6,6 +5,7 @@ import * as parquet_schema from './schema';
 import { BufferReaderOptions } from './bufferReader';
 import { Parameter, PageData, ClientS3, ClientParameters, FileMetaDataExt, RowGroupExt, ColumnChunkExt } from './declare';
 import { Options } from './codec/types';
+import { S3Client } from '@aws-sdk/client-s3';
 /**
  * A parquet cursor is used to retrieve rows from a parquet file in order
  */
@@ -13,8 +13,8 @@ declare class ParquetCursor {
     metadata: FileMetaDataExt;
     envelopeReader: ParquetEnvelopeReader;
     schema: parquet_schema.ParquetSchema;
-    columnList: Array<Array<unknown>>;
-    rowGroup: Array<unknown>;
+    columnList: unknown[][];
+    rowGroup: unknown[];
     rowGroupIndex: number;
     cursorIndex: number;
     /**
@@ -23,7 +23,7 @@ declare class ParquetCursor {
      * advanced and internal use cases. Consider using getCursor() on the
      * ParquetReader instead
      */
-    constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: Array<Array<unknown>>);
+    constructor(metadata: FileMetaDataExt, envelopeReader: ParquetEnvelopeReader, schema: parquet_schema.ParquetSchema, columnList: unknown[][]);
     /**
      * Retrieve the next row from the cursor. Returns a row or NULL if the end
      * of the file was reached
@@ -52,11 +52,14 @@ export declare class ParquetReader {
     static openFile(filePath: string | Buffer | URL, options?: BufferReaderOptions): Promise<ParquetReader>;
     static openBuffer(buffer: Buffer, options?: BufferReaderOptions): Promise<ParquetReader>;
     /**
-     * Open the parquet file from S3 using the supplied aws client and params
-     * The params have to include `Bucket` and `Key` to the file requested
-     * This function returns a new parquet reader
+     * Open the parquet file from S3 using the supplied aws client [, commands] and params
+     * The params have to include `Bucket` and `Key` to the file requested,
+     * If using v3 of the AWS SDK, combine the client and commands into an object wiht keys matching
+     * the original module names, and do not instantiate the commands; pass them as classes/modules.
+     *
+     * This function returns a new parquet reader [ or throws an Error.]
      */
-    static openS3(client: ClientS3, params: ClientParameters, options?: BufferReaderOptions): Promise<ParquetReader>;
+    static openS3(client: any, params: ClientParameters, options?: BufferReaderOptions): Promise<ParquetReader>;
     /**
      * Open the parquet file from a url using the supplied request module
      * params should either be a string (url) or an object that includes
@@ -92,7 +95,7 @@ export declare class ParquetReader {
      * from disk. An empty array or no value implies all columns. A list of column
      * names means that only those columns should be loaded from disk.
      */
-    getCursor(columnList?: Array<Array<unknown>>): ParquetCursor;
+    getCursor(columnList?: unknown[][]): ParquetCursor;
     getBloomFiltersFor(columnNames: string[]): Promise<Record<string, {
         sbbf: import("./bloom/sbbf").default;
         columnName: string;
@@ -123,26 +126,28 @@ export declare class ParquetEnvelopeReader {
     readFn: (offset: number, length: number, file?: string) => Promise<Buffer>;
     close: () => unknown;
     id: number;
-    fileSize: Function | number;
+    fileSize: number | (() => Promise<number>);
     default_dictionary_size: number;
     metadata?: FileMetaDataExt;
     schema?: parquet_schema.ParquetSchema;
     static openFile(filePath: string | Buffer | URL, options?: BufferReaderOptions): Promise<ParquetEnvelopeReader>;
     static openBuffer(buffer: Buffer, options?: BufferReaderOptions): Promise<ParquetEnvelopeReader>;
     static openS3(client: ClientS3, params: ClientParameters, options?: BufferReaderOptions): Promise<ParquetEnvelopeReader>;
+    static openS3v3(client: S3Client, params: any, options: any): Promise<ParquetEnvelopeReader>;
+    static streamToBuffer(body: any): Promise<Buffer>;
     static openUrl(url: Parameter | URL | string, options?: BufferReaderOptions): Promise<ParquetEnvelopeReader>;
-    constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer>, closeFn: () => unknown, fileSize: Function | number, options?: BufferReaderOptions, metadata?: FileMetaDataExt);
+    constructor(readFn: (offset: number, length: number, file?: string) => Promise<Buffer>, closeFn: () => unknown, fileSize: number | (() => Promise<number>), options?: BufferReaderOptions, metadata?: FileMetaDataExt);
     read(offset: number, length: number, file?: string): Promise<Buffer>;
     readHeader(): Promise<void>;
     getColumn(path: string | parquet_thrift.ColumnChunk, row_group: RowGroupExt | number | string | null): ColumnChunkExt;
-    getAllColumnChunkDataFor(paths: Array<string>, row_groups?: Array<RowGroupExt>): {
+    getAllColumnChunkDataFor(paths: string[], row_groups?: RowGroupExt[]): {
         rowGroupIndex: number;
         column: ColumnChunkExt;
     }[];
     readOffsetIndex(path: string | ColumnChunkExt, row_group: RowGroupExt | number | null, opts: Options): Promise<parquet_thrift.OffsetIndex>;
     readColumnIndex(path: string | ColumnChunkExt, row_group: RowGroupExt | number, opts: Options): Promise<parquet_thrift.ColumnIndex>;
-    readPage(column: ColumnChunkExt, page: parquet_thrift.PageLocation | number, records: Array<Record<string, unknown>>, opts: Options): Promise<Record<string, unknown>[]>;
-    readRowGroup(schema: parquet_schema.ParquetSchema, rowGroup: RowGroupExt, columnList: Array<Array<unknown>>): Promise<parquet_shredder.RecordBuffer>;
+    readPage(column: ColumnChunkExt, page: parquet_thrift.PageLocation | number, records: Record<string, unknown>[], opts: Options): Promise<Record<string, unknown>[]>;
+    readRowGroup(schema: parquet_schema.ParquetSchema, rowGroup: RowGroupExt, columnList: unknown[][]): Promise<parquet_shredder.RecordBuffer>;
     readColumnChunk(schema: parquet_schema.ParquetSchema, colChunk: ColumnChunkExt, opts?: Options): Promise<PageData>;
     readFooter(): Promise<parquet_thrift.FileMetaData>;
 }

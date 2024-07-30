@@ -2,17 +2,17 @@
 const zlib = require('zlib');
 const snappy = require('snappyjs');
 const PARQUET_COMPRESSION_METHODS = {
-    'UNCOMPRESSED': {
+    UNCOMPRESSED: {
         deflate: deflate_identity,
-        inflate: inflate_identity
+        inflate: inflate_identity,
     },
-    'GZIP': {
+    GZIP: {
         deflate: deflate_gzip,
-        inflate: inflate_gzip
+        inflate: inflate_gzip,
     },
-    'SNAPPY': {
+    SNAPPY: {
         deflate: deflate_snappy,
-        inflate: inflate_snappy
+        inflate: inflate_snappy,
     },
 };
 /**

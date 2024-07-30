@@ -46,13 +46,17 @@ class fixedTFramedTransport extends thrift_1.default.TFramedTransport {
     }
 }
 /** Patch PageLocation to be three element array that has getters/setters
-  * for each of the properties (offset, compressed_page_size, first_row_index)
-  * This saves space considerably as we do not need to store the full variable
-  * names for every PageLocation
-  */
+ * for each of the properties (offset, compressed_page_size, first_row_index)
+ * This saves space considerably as we do not need to store the full variable
+ * names for every PageLocation
+ */
 const getterSetter = (index) => ({
-    get: function () { return this[index]; },
-    set: function (value) { return this[index] = value; }
+    get: function () {
+        return this[index];
+    },
+    set: function (value) {
+        return (this[index] = value);
+    },
 });
 Object.defineProperty(parquet_thrift.PageLocation.prototype, 'offset', getterSetter(0));
 Object.defineProperty(parquet_thrift.PageLocation.prototype, 'compressed_page_size', getterSetter(1));
@@ -61,13 +65,13 @@ Object.defineProperty(parquet_thrift.PageLocation.prototype, 'first_row_index', 
  * Helper function that serializes a thrift object into a buffer
  */
 const serializeThrift = function (obj) {
-    let output = [];
+    const output = [];
     const callBack = function (buf) {
         output.push(buf);
     };
-    let transport = new thrift_1.default.TBufferedTransport(undefined, callBack);
-    let protocol = new thrift_1.default.TCompactProtocol(transport);
-    //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
+    const transport = new thrift_1.default.TBufferedTransport(undefined, callBack);
+    const protocol = new thrift_1.default.TCompactProtocol(transport);
+    //@ts-expect-error, https://issues.apache.org/jira/browse/THRIFT-3872
     obj.write(protocol);
     transport.flush();
     return Buffer.concat(output);
@@ -77,10 +81,10 @@ const decodeThrift = function (obj, buf, offset) {
     if (!offset) {
         offset = 0;
     }
-    var transport = new fixedTFramedTransport(buf);
+    const transport = new fixedTFramedTransport(buf);
     transport.readPos = offset;
-    var protocol = new thrift_1.default.TCompactProtocol(transport);
-    //@ts-ignore, https://issues.apache.org/jira/browse/THRIFT-3872
+    const protocol = new thrift_1.default.TCompactProtocol(transport);
+    //@ts-expect-error, https://issues.apache.org/jira/browse/THRIFT-3872
     obj.read(protocol);
     return transport.readPos - offset;
 };
@@ -101,7 +105,7 @@ exports.getBitWidth = getBitWidth;
  * FIXME not ideal that this is linear
  */
 const getThriftEnum = function (klass, value) {
-    for (let k in klass) {
+    for (const k in klass) {
         if (klass[k] === value) {
             return k;
         }
@@ -136,7 +140,7 @@ const fstat = function (filePath) {
 };
 exports.fstat = fstat;
 const fread = function (fd, position, length) {
-    let buffer = Buffer.alloc(length);
+    const buffer = Buffer.alloc(length);
     return new Promise((resolve, reject) => {
         fs_1.default.read(fd, buffer, 0, length, position, (err, bytesRead, buf) => {
             if (err || bytesRead != length) {
@@ -190,8 +194,8 @@ const osend = function (os) {
 exports.osend = osend;
 const osopen = function (path, opts) {
     return new Promise((resolve, reject) => {
-        let outputStream = fs_1.default.createWriteStream(path, opts);
-        outputStream.on('open', function (fd) {
+        const outputStream = fs_1.default.createWriteStream(path, opts);
+        outputStream.on('open', function (_fd) {
             resolve(outputStream);
         });
         outputStream.on('error', function (err) {

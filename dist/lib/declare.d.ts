@@ -1,8 +1,7 @@
-/// <reference types="node" />
-import parquet_thrift from "../gen-nodejs/parquet_types";
-import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader } from "../gen-nodejs/parquet_types";
-import SplitBlockBloomFilter from "./bloom/sbbf";
-import { createSBBFParams } from "./bloomFilterIO/bloomFilterWriter";
+import parquet_thrift from '../gen-nodejs/parquet_types';
+import { Statistics, OffsetIndex, ColumnIndex, PageType, DataPageHeader, DataPageHeaderV2, DictionaryPageHeader, IndexPageHeader } from '../gen-nodejs/parquet_types';
+import SplitBlockBloomFilter from './bloom/sbbf';
+import { createSBBFParams } from './bloomFilterIO/bloomFilterWriter';
 import Int64 from 'node-int64';
 export type ParquetCodec = 'PLAIN' | 'RLE';
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4';
@@ -10,9 +9,7 @@ export type RepetitionType = 'REQUIRED' | 'OPTIONAL' | 'REPEATED';
 export type ParquetType = PrimitiveType | OriginalType;
 export type PrimitiveType = 'BOOLEAN' | 'INT32' | 'INT64' | 'INT96' | 'FLOAT' | 'DOUBLE' | 'BYTE_ARRAY' | 'FIXED_LEN_BYTE_ARRAY';
 export type OriginalType = 'UTF8' | 'MAP' | 'LIST' | 'ENUM' | 'DECIMAL' | 'DATE' | 'TIME_MILLIS' | 'TIME_MICROS' | 'TIMESTAMP_MILLIS' | 'TIMESTAMP_MICROS' | 'UINT_8' | 'UINT_16' | 'UINT_32' | 'UINT_64' | 'INT_8' | 'INT_16' | 'INT_32' | 'INT_64' | 'JSON' | 'BSON' | 'INTERVAL';
-export interface SchemaDefinition {
-    [string: string]: FieldDefinition;
-}
+export type SchemaDefinition = Record<string, FieldDefinition>;
 export interface FieldDefinition {
     type?: ParquetType;
     typeLength?: number;
@@ -58,9 +55,7 @@ export interface ParquetBuffer {
     rowCount?: number;
     columnData?: Record<string, PageData>;
 }
-export interface ParquetRecord {
-    [key: string]: any;
-}
+export type ParquetRecord = Record<string, any>;
 export interface ColumnChunkData {
     rowGroupIndex: number;
     column: parquet_thrift.ColumnChunk;
@@ -99,7 +94,7 @@ export interface PageData {
     pageHeaders?: PageHeader[];
     pageHeader?: PageHeader;
     count?: number;
-    dictionary?: Array<unknown>;
+    dictionary?: unknown[];
     column?: parquet_thrift.ColumnChunk;
     useDictionary?: boolean;
 }
@@ -145,9 +140,8 @@ export interface FileMetaDataExt extends parquet_thrift.FileMetaData {
 export declare class NewPageHeader extends parquet_thrift.PageHeader {
     offset?: number;
     headerSize?: number;
-    constructor();
 }
-export type WriterOptions = {
+export interface WriterOptions {
     pageIndex?: boolean;
     pageSize?: number;
     useDataPageV2?: boolean;
@@ -162,13 +156,13 @@ export type WriterOptions = {
     emitClose?: boolean;
     start?: number;
     highWaterMark?: number;
-};
-export type Page = {
+}
+export interface Page {
     page: Buffer;
     statistics: parquet_thrift.Statistics;
     first_row_index: number;
     distinct_values: Set<any>;
     num_values: number;
     count?: number;
-};
+}
 export {};

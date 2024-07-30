@@ -35,14 +35,7 @@ const xxhasher_1 = __importDefault(require("./xxhasher"));
  */
 class SplitBlockBloomFilter {
     static salt = [
-        0x47b6137b,
-        0x44974d91,
-        0x8824ad5b,
-        0xa2b7289d,
-        0x705495c7,
-        0x2df1424b,
-        0x9efc4947,
-        0x5c6bfb31
+        0x47b6137b, 0x44974d91, 0x8824ad5b, 0xa2b7289d, 0x705495c7, 0x2df1424b, 0x9efc4947, 0x5c6bfb31,
     ];
     // How many bits are in a single block:
     // - Blocks are UInt32 arrays
@@ -54,7 +47,7 @@ class SplitBlockBloomFilter {
     static NUMBER_OF_BLOCKS = 32;
     // The lower bound of SBBF size in bytes.
     // Currently this is 1024
-    static LOWER_BOUND_BYTES = SplitBlockBloomFilter.NUMBER_OF_BLOCKS * SplitBlockBloomFilter.BITS_PER_BLOCK / 8;
+    static LOWER_BOUND_BYTES = (SplitBlockBloomFilter.NUMBER_OF_BLOCKS * SplitBlockBloomFilter.BITS_PER_BLOCK) / 8;
     // The upper bound of SBBF size, set to default row group size in bytes.
     // Note that the subsquent requirements for an effective bloom filter on a row group this size would mean this
     // is unacceptably large for a lightweight client application.
@@ -74,18 +67,18 @@ class SplitBlockBloomFilter {
      * from the provided Buffer
      * @param buffer a NodeJs Buffer containing bloom filter data for a row group.
      */
-    static from(buffer, rowCount) {
+    static from(buffer, _rowCount) {
         if (buffer.length === 0) {
-            throw new Error("buffer is empty");
+            throw new Error('buffer is empty');
         }
         const chunkSize = SplitBlockBloomFilter.WORDS_PER_BLOCK;
         const uint32sFromBuf = new Uint32Array(buffer.buffer);
-        let result = [];
+        const result = [];
         const length = uint32sFromBuf.length;
         for (let index = 0; index < length; index += chunkSize) {
             result.push(uint32sFromBuf.subarray(index, index + chunkSize));
         }
-        let sb = new SplitBlockBloomFilter();
+        const sb = new SplitBlockBloomFilter();
         sb.splitBlockFilter = result;
         sb.numBlocks = result.length;
         // these will not be knowable when reading
@@ -93,7 +86,6 @@ class SplitBlockBloomFilter {
         sb.desiredFalsePositiveRate = 0.0;
         return sb;
     }
-    ;
     /**
      * @function getBlockIndex: get a block index to insert a hash value for
      * @param h the hash from which to derive a block index (?)
@@ -120,8 +112,8 @@ class SplitBlockBloomFilter {
      * @return number: number of bits of given n and p.
      */
     static optimalNumOfBlocks(numDistinct, falsePositiveRate) {
-        let m = -8 * numDistinct / Math.log(1 - Math.pow(falsePositiveRate, 1.0 / 8));
-        m = (m + SplitBlockBloomFilter.NUMBER_OF_BLOCKS - 1) & (~SplitBlockBloomFilter.NUMBER_OF_BLOCKS);
+        let m = (-8 * numDistinct) / Math.log(1 - Math.pow(falsePositiveRate, 1.0 / 8));
+        m = (m + SplitBlockBloomFilter.NUMBER_OF_BLOCKS - 1) & ~SplitBlockBloomFilter.NUMBER_OF_BLOCKS;
         // Handle overflow:
         const upperShiftL3 = SplitBlockBloomFilter.UPPER_BOUND_BYTES << 3;
         if (m > upperShiftL3 || m < 0) {
@@ -144,7 +136,7 @@ class SplitBlockBloomFilter {
      * @return mask Block
      */
     static mask(hashValue) {
-        let result = SplitBlockBloomFilter.initBlock();
+        const result = SplitBlockBloomFilter.initBlock();
         for (let i = 0; i < result.length; i++) {
             const y = hashValue.getLowBitsUnsigned() * SplitBlockBloomFilter.salt[i];
             result[i] = result[i] | (1 << (y >>> 27));
@@ -205,11 +197,21 @@ class SplitBlockBloomFilter {
     numDistinctValues = SplitBlockBloomFilter.DEFAULT_DISTINCT_VALUES;
     hashStrategy = new parquet_types_1.default.BloomFilterHash(new parquet_types_1.default.XxHash());
     hasher = new xxhasher_1.default();
-    isInitialized() { return this.splitBlockFilter.length > 0; }
-    getFalsePositiveRate() { return this.desiredFalsePositiveRate; }
-    getNumDistinct() { return this.numDistinctValues; }
-    getNumFilterBlocks() { return this.splitBlockFilter.length; }
-    getFilter() { return this.splitBlockFilter; }
+    isInitialized() {
+        return this.splitBlockFilter.length > 0;
+    }
+    getFalsePositiveRate() {
+        return this.desiredFalsePositiveRate;
+    }
+    getNumDistinct() {
+        return this.numDistinctValues;
+    }
+    getNumFilterBlocks() {
+        return this.splitBlockFilter.length;
+    }
+    getFilter() {
+        return this.splitBlockFilter;
+    }
     /**
      * @function  optNumFilterBytes
      * @description return the actual number of filter bytes set; if the option to numBytes
@@ -217,7 +219,7 @@ class SplitBlockBloomFilter {
      *     and/or numDistinct were called, this function returns the calculated value.
      */
     getNumFilterBytes() {
-        return this.numBlocks * SplitBlockBloomFilter.BITS_PER_BLOCK >>> 3;
+        return (this.numBlocks * SplitBlockBloomFilter.BITS_PER_BLOCK) >>> 3;
     }
     /**
      * @function setOptionFalsePositiveRate
@@ -228,11 +230,11 @@ class SplitBlockBloomFilter {
      */
     setOptionFalsePositiveRate(proportion) {
         if (this.isInitialized()) {
-            console.error("filter already initialized. options may no longer be changed.");
+            console.error('filter already initialized. options may no longer be changed.');
             return this;
         }
         if (proportion <= 0.0 || proportion >= 1.0) {
-            console.error("falsePositiveProbability. Must be < 1.0 and > 0.0");
+            console.error('falsePositiveProbability. Must be < 1.0 and > 0.0');
             return this;
         }
         this.desiredFalsePositiveRate = proportion;
@@ -248,7 +250,7 @@ class SplitBlockBloomFilter {
      */
     setOptionNumDistinct(numDistinct) {
         if (this.isInitialized()) {
-            console.error("filter already initialized. options may no longer be changed.");
+            console.error('filter already initialized. options may no longer be changed.');
             return this;
         }
         if (numDistinct <= 0 || numDistinct > SplitBlockBloomFilter.UPPER_BOUND_BYTES) {
@@ -284,7 +286,7 @@ class SplitBlockBloomFilter {
      */
     setOptionNumFilterBytes(numBytes) {
         if (this.isInitialized()) {
-            console.error("filter already initialized. options may no longer be changed.");
+            console.error('filter already initialized. options may no longer be changed.');
             return this;
         }
         if (numBytes < SplitBlockBloomFilter.LOWER_BOUND_BYTES || numBytes > SplitBlockBloomFilter.UPPER_BOUND_BYTES) {
@@ -292,7 +294,7 @@ class SplitBlockBloomFilter {
             return this;
         }
         // numBlocks = Bytes * 8b/Byte * 1Block/256b
-        this.numBlocks = SplitBlockBloomFilter.nextPwr2(numBytes) * 8 / SplitBlockBloomFilter.BITS_PER_BLOCK;
+        this.numBlocks = (SplitBlockBloomFilter.nextPwr2(numBytes) * 8) / SplitBlockBloomFilter.BITS_PER_BLOCK;
         return this;
     }
     /**
@@ -308,30 +310,31 @@ class SplitBlockBloomFilter {
      */
     init() {
         if (this.isInitialized()) {
-            console.error("filter already initialized.");
+            console.error('filter already initialized.');
             return this;
         }
-        if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
-            throw new Error("unsupported hash strategy");
+        if (!Object.prototype.hasOwnProperty.call(this.hashStrategy, 'XXHASH')) {
+            throw new Error('unsupported hash strategy');
         }
         if (this.numBlocks === 0) {
-            this.numBlocks = SplitBlockBloomFilter.optimalNumOfBlocks(this.numDistinctValues, this.desiredFalsePositiveRate) >>> 3;
+            this.numBlocks =
+                SplitBlockBloomFilter.optimalNumOfBlocks(this.numDistinctValues, this.desiredFalsePositiveRate) >>> 3;
         }
         this.splitBlockFilter = Array(this.numBlocks).fill(SplitBlockBloomFilter.initBlock());
         return this;
     }
     async hash(value) {
-        if (!this.hashStrategy.hasOwnProperty("XXHASH")) {
-            throw new Error("unsupported hash strategy");
+        if (!Object.prototype.hasOwnProperty.call(this.hashStrategy, 'XXHASH')) {
+            throw new Error('unsupported hash strategy');
         }
         const hashed = await this.hasher.hash64(value);
         return long_1.default.fromString(hashed, true, 16);
     }
     insertHash(hashValue) {
         if (!hashValue.unsigned)
-            throw new Error("hashValue must be an unsigned Long");
+            throw new Error('hashValue must be an unsigned Long');
         if (!this.isInitialized())
-            throw new Error("filter has not been initialized. call init() first");
+            throw new Error('filter has not been initialized. call init() first');
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length);
         SplitBlockBloomFilter.blockInsert(this.splitBlockFilter[i], hashValue);
     }
@@ -343,14 +346,14 @@ class SplitBlockBloomFilter {
      */
     async insert(value) {
         if (!this.isInitialized())
-            throw new Error("filter has not been initialized. call init() first");
+            throw new Error('filter has not been initialized. call init() first');
         this.insertHash(await this.hash(value));
     }
     checkHash(hashValue) {
         if (!hashValue.unsigned)
-            throw new Error("hashValue must be an unsigned Long");
+            throw new Error('hashValue must be an unsigned Long');
         if (!this.isInitialized())
-            throw new Error("filter has not been initialized");
+            throw new Error('filter has not been initialized');
         const i = SplitBlockBloomFilter.getBlockIndex(hashValue, this.splitBlockFilter.length);
         return SplitBlockBloomFilter.blockCheck(this.splitBlockFilter[i], hashValue);
     }
@@ -363,7 +366,7 @@ class SplitBlockBloomFilter {
      */
     async check(value) {
         if (!this.isInitialized())
-            throw new Error("filter has not been initialized");
+            throw new Error('filter has not been initialized');
         return this.checkHash(await this.hash(value));
     }
 }

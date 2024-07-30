@@ -12,19 +12,16 @@ function encodeRunBitpacked(values, opts) {
     for (let i = 0; i < values.length % 8; i++) {
         values.push(0);
     }
-    let buf = Buffer.alloc(Math.ceil(opts.bitWidth * (values.length / 8)));
+    const buf = Buffer.alloc(Math.ceil(opts.bitWidth * (values.length / 8)));
     for (let b = 0; b < opts.bitWidth * values.length; ++b) {
         if ((values[Math.floor(b / opts.bitWidth)] & (1 << b % opts.bitWidth)) > 0) {
-            buf[Math.floor(b / 8)] |= (1 << (b % 8));
+            buf[Math.floor(b / 8)] |= 1 << b % 8;
         }
     }
-    return Buffer.concat([
-        Buffer.from(varint_1.default.encode(((values.length / 8) << 1) | 1)),
-        buf
-    ]);
+    return Buffer.concat([Buffer.from(varint_1.default.encode(((values.length / 8) << 1) | 1)), buf]);
 }
 function encodeRunRepeated(value, count, opts) {
-    let buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
+    const buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8));
     let remainingValue = value;
     // This is encoded LSB to MSB, so we pick off the least
     // significant byte and shift to get the next one.
@@ -32,10 +29,7 @@ function encodeRunRepeated(value, count, opts) {
         buf.writeUInt8(remainingValue & 0xff, i);
         remainingValue = remainingValue >> 8;
     }
-    return Buffer.concat([
-        Buffer.from(varint_1.default.encode(count << 1)),
-        buf
-    ]);
+    return Buffer.concat([Buffer.from(varint_1.default.encode(count << 1)), buf]);
 }
 function unknownToParsedInt(value) {
     if (typeof value === 'string') {
@@ -93,7 +87,7 @@ const encodeValues = function (type, values, opts) {
     if (opts.disableEnvelope) {
         return buf;
     }
-    let envelope = Buffer.alloc(buf.length + 4);
+    const envelope = Buffer.alloc(buf.length + 4);
     envelope.writeUInt32LE(buf.length);
     buf.copy(envelope, 4);
     return envelope;
@@ -103,17 +97,17 @@ function decodeRunBitpacked(cursor, count, opts) {
     if (count % 8 !== 0) {
         throw 'must be a multiple of 8';
     }
-    let values = new Array(count).fill(0);
+    const values = new Array(count).fill(0);
     for (let b = 0; b < opts.bitWidth * count; ++b) {
-        if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << (b % 8))) {
-            values[Math.floor(b / opts.bitWidth)] |= (1 << b % opts.bitWidth);
+        if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << b % 8)) {
+            values[Math.floor(b / opts.bitWidth)] |= 1 << b % opts.bitWidth;
         }
     }
     cursor.offset += opts.bitWidth * (count / 8);
     return values;
 }
 function decodeRunRepeated(cursor, count, opts) {
-    var bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
+    const bytesNeededForFixedBitWidth = Math.ceil(opts.bitWidth / 8);
     let value = 0;
     for (let i = 0; i < bytesNeededForFixedBitWidth; ++i) {
         const byte = cursor.buffer[cursor.offset];
@@ -148,7 +142,7 @@ const decodeValues = function (_, cursor, count, opts) {
     }
     values = values.slice(0, count);
     if (values.length !== count) {
-        throw "invalid RLE encoding";
+        throw 'invalid RLE encoding';
     }
     return values;
 };

@@ -1,4 +1,4 @@
-import { FieldDefinition, ParquetType, SchemaDefinition } from "./declare";
+import { FieldDefinition, ParquetType, SchemaDefinition } from './declare';
 export declare function createStringField(optional?: boolean, fieldOptions?: FieldDefinition): FieldDefinition;
 export declare function createBooleanField(optional?: boolean, fieldOptions?: FieldDefinition): FieldDefinition;
 export declare function createIntField(size: 32 | 64, optional?: boolean, fieldOptions?: FieldDefinition): FieldDefinition;

@@ -1,12 +1,12 @@
-import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from "./declare";
-import { Options } from "./codec/types";
-type ParquetTypeDataObject = {
+import { PrimitiveType, OriginalType, ParquetType, FieldDefinition, ParquetField } from './declare';
+import { Options } from './codec/types';
+interface ParquetTypeDataObject {
     primitiveType?: PrimitiveType;
-    toPrimitive: Function;
-    fromPrimitive?: Function;
+    toPrimitive: (x: any) => any;
+    fromPrimitive?: (x: any) => any;
     originalType?: OriginalType;
     typeLength?: number;
-};
+}
 export declare function getParquetTypeDataObject(type: ParquetType, field?: ParquetField | Options | FieldDefinition): ParquetTypeDataObject;
 /**
  * Convert a value from it's native representation to the internal/underlying

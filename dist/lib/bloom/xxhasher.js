@@ -16,7 +16,7 @@ const long_1 = __importDefault(require("long"));
  * [xxHash spec](https://github.com/Cyan4973/xxHash/blob/v0.7.0/doc/xxhash_spec.md)
  */
 class XxHasher {
-    static h64 = (0, xxhash_wasm_1.default)().then(x => x.h64ToString);
+    static h64 = (0, xxhash_wasm_1.default)().then((x) => x.h64ToString);
     async hashIt(value) {
         return (await XxHasher.h64)(value);
     }
@@ -38,7 +38,7 @@ class XxHasher {
             typeof value === 'bigint') {
             return this.hashIt(value.toString());
         }
-        throw new Error("unsupported type: " + value);
+        throw new Error('unsupported type: ' + value);
     }
 }
 exports.default = XxHasher;

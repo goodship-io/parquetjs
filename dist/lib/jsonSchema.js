@@ -31,15 +31,15 @@ const fields = __importStar(require("./fields"));
  */
 const isJsonSchemaSupported = (js) => {
     const unsupportedFields = [
-        "$ref",
-        "multipleOf",
-        "allOf",
-        "anyOf",
-        "oneOf",
-        "not",
-        "additionalItems",
-        "enum",
-        "extends",
+        '$ref',
+        'multipleOf',
+        'allOf',
+        'anyOf',
+        'oneOf',
+        'not',
+        'additionalItems',
+        'enum',
+        'extends',
     ];
     for (const field in unsupportedFields) {
         if (!(js[field] === undefined || js[field] === false)) {
@@ -64,7 +64,8 @@ exports.UnsupportedJsonSchemaError = UnsupportedJsonSchemaError;
  */
 const isJsonSchemaRequired = (jsonSchema) => (field) => {
     switch (jsonSchema.required) {
-        case true: return true;
+        case true:
+            return true;
         case undefined:
         case false:
             return false;
@@ -76,7 +77,7 @@ const isJsonSchemaRequired = (jsonSchema) => (field) => {
  */
 const fromJsonSchemaArray = (fieldValue, optionalFieldList) => {
     if (!fieldValue.items || !fieldValue.items.type) {
-        throw new UnsupportedJsonSchemaError("Array field with no values found.");
+        throw new UnsupportedJsonSchemaError('Array field with no values found.');
     }
     switch (fieldValue.items.type) {
         case 'string':
@@ -85,8 +86,9 @@ const fromJsonSchemaArray = (fieldValue, optionalFieldList) => {
             }
             return fields.createListField('UTF8', optionalFieldList);
         case 'integer':
-        case 'number':
             return fields.createListField('INT64', optionalFieldList);
+        case 'number':
+            return fields.createListField('DOUBLE', optionalFieldList);
         case 'boolean':
             return fields.createListField('BOOLEAN', optionalFieldList);
         case 'object':
@@ -110,8 +112,9 @@ const fromJsonSchemaField = (jsonSchema) => (fieldName, fieldValue) => {
             }
             return fields.createStringField(optional);
         case 'integer':
-        case 'number':
             return fields.createIntField(64, optional);
+        case 'number':
+            return fields.createDoubleField(optional);
         case 'boolean':
             return fields.createBooleanField(optional);
         case 'array':
@@ -127,7 +130,7 @@ const fromJsonSchemaField = (jsonSchema) => (fieldName, fieldValue) => {
  */
 const fromJsonSchema = (jsonSchema) => {
     if (!isJsonSchemaSupported(jsonSchema)) {
-        throw new UnsupportedJsonSchemaError("Unsupported fields found");
+        throw new UnsupportedJsonSchemaError('Unsupported fields found');
     }
     const schema = {};
     const fromField = fromJsonSchemaField(jsonSchema);

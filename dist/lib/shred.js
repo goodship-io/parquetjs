@@ -27,14 +27,14 @@ exports.materializeRecords = exports.shredRecord = void 0;
 const parquet_types = __importStar(require("./types"));
 const shredRecord = function (schema, record, buffer) {
     /* shred the record, this may raise an exception */
-    var recordShredded = {};
-    for (let field of schema.fieldList) {
+    const recordShredded = {};
+    for (const field of schema.fieldList) {
         recordShredded[field.path.join(',')] = {
             dlevels: [],
             rlevels: [],
             values: [],
             distinct_values: new Set(),
-            count: 0
+            count: 0,
         };
     }
     shredRecordInternal(schema.fields, record, recordShredded, 0, 0);
@@ -44,24 +44,24 @@ const shredRecord = function (schema, record, buffer) {
         buffer.pageRowCount = 0;
         buffer.columnData = {};
         buffer.pages = {};
-        for (let field of schema.fieldList) {
-            let path = field.path.join(',');
+        for (const field of schema.fieldList) {
+            const path = field.path.join(',');
             buffer.columnData[path] = {
                 dlevels: [],
                 rlevels: [],
                 values: [],
                 distinct_values: new Set(),
-                count: 0
+                count: 0,
             };
             buffer.pages[path] = [];
         }
     }
     buffer.rowCount += 1;
     buffer.pageRowCount += 1;
-    for (let field of schema.fieldList) {
-        let path = field.path.join(',');
-        let record = recordShredded[path];
-        let column = buffer.columnData[path];
+    for (const field of schema.fieldList) {
+        const path = field.path.join(',');
+        const record = recordShredded[path];
+        const column = buffer.columnData[path];
         for (let i = 0; i < record.rlevels.length; i++) {
             column.rlevels.push(record.rlevels[i]);
             column.dlevels.push(record.dlevels[i]);
@@ -69,23 +69,24 @@ const shredRecord = function (schema, record, buffer) {
                 column.values.push(record.values[i]);
             }
         }
-        [...recordShredded[path].distinct_values].forEach(value => buffer.columnData[path].distinct_values.add(value));
+        [...recordShredded[path].distinct_values].forEach((value) => buffer.columnData[path].distinct_values.add(value));
         buffer.columnData[path].count += recordShredded[path].count;
     }
 };
 exports.shredRecord = shredRecord;
 function shredRecordInternal(fields, record, data, rlvl, dlvl) {
-    for (let fieldName in fields) {
+    for (const fieldName in fields) {
         const field = fields[fieldName];
         const fieldType = field.originalType || field.primitiveType;
         const path = field.path.join(',');
         // fetch values
         let values = [];
-        if (record && (fieldName in record) && record[fieldName] !== undefined && record[fieldName] !== null) {
+        if (record && fieldName in record && record[fieldName] !== undefined && record[fieldName] !== null) {
             if (Array.isArray(record[fieldName])) {
                 values = record[fieldName];
             }
-            else if (ArrayBuffer.isView(record[fieldName])) { // checks if any typed array
+            else if (ArrayBuffer.isView(record[fieldName])) {
+                // checks if any typed array
                 if (record[fieldName] instanceof Uint8Array) {
                     // wrap in a buffer, since not supported by parquet_thrift
                     values.push(Buffer.from(record[fieldName]));
@@ -157,11 +158,11 @@ const materializeRecords = function (schema, buffer, records) {
     if (!records) {
         records = [];
     }
-    for (let k in buffer.columnData) {
+    for (const k in buffer.columnData) {
         const field = schema.findField(k);
         const fieldBranch = schema.findFieldBranch(k);
-        let values = buffer.columnData[k].values[Symbol.iterator]();
-        let rLevels = new Array(field.rLevelMax + 1);
+        const values = buffer.columnData[k].values[Symbol.iterator]();
+        const rLevels = new Array(field.rLevelMax + 1);
         rLevels.fill(0);
         for (let i = 0; i < buffer.columnData[k].count; ++i) {
             const dLevel = buffer.columnData[k].dlevels[i];
@@ -182,10 +183,12 @@ exports.materializeRecords = materializeRecords;
 function materializeRecordField(record, branch, rLevels, dLevel, value) {
     const node = branch[0];
     if (dLevel < node.dLevelMax) {
+        // This ensures that nulls are correctly processed
+        record[node.name] = value;
         return;
     }
     if (branch.length > 1) {
-        if (node.repetitionType === "REPEATED") {
+        if (node.repetitionType === 'REPEATED') {
             if (!(node.name in record)) {
                 record[node.name] = [];
             }
@@ -202,7 +205,7 @@ function materializeRecordField(record, branch, rLevels, dLevel, value) {
         }
     }
     else {
-        if (node.repetitionType === "REPEATED") {
+        if (node.repetitionType === 'REPEATED') {
             if (!(node.name in record)) {
                 record[node.name] = [];
             }
