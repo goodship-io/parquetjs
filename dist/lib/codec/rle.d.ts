@@ -1,6 +1,5 @@
-/// <reference types="node" />
 import { Cursor } from './types';
-export declare const encodeValues: (type: string, values: Array<number>, opts: {
+export declare const encodeValues: (type: string, values: number[], opts: {
     bitWidth: number;
     disableEnvelope?: boolean;
 }) => Buffer;

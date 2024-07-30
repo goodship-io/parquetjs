@@ -6,7 +6,7 @@ import { JSONSchema4 } from 'json-schema';
 export declare class ParquetSchema {
     schema: SchemaDefinition;
     fields: Record<string, ParquetField>;
-    fieldList: Array<ParquetField>;
+    fieldList: ParquetField[];
     /**
      * Create a new schema from JSON Schema (json-schema.org)
      */
@@ -18,9 +18,9 @@ export declare class ParquetSchema {
     /**
      * Retrieve a field definition
      */
-    findField(path: string | Array<string>): ParquetField;
+    findField(path: string | string[]): ParquetField;
     /**
      * Retrieve a field definition and all the field's ancestors
      */
-    findFieldBranch(path: string | Array<string>): ParquetField[];
+    findFieldBranch(path: string | string[]): ParquetField[];
 }

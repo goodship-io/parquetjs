@@ -1,7 +1,6 @@
-/// <reference types="node" />
-import { PrimitiveType } from "../declare";
-import { ParquetCodec, OriginalType, ParquetField } from "../declare";
-import { Statistics } from "../../gen-nodejs/parquet_types";
+import { PrimitiveType } from '../declare';
+import { ParquetCodec, OriginalType, ParquetField } from '../declare';
+import { Statistics } from '../../gen-nodejs/parquet_types';
 export interface Options {
     typeLength: number;
     bitWidth: number;
@@ -13,7 +12,7 @@ export interface Options {
     column?: ParquetField;
     rawStatistics?: Statistics;
     cache?: unknown;
-    dictionary?: Array<number>;
+    dictionary?: number[];
     num_values?: number;
     rLevelMax?: number;
     dLevelMax?: number;

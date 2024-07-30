@@ -1,6 +1,5 @@
-/// <reference types="node" />
 import Long from 'long';
-import { Block } from "../declare";
+import { Block } from '../declare';
 /**
  * @class SplitBlockBloomFilter
  *
@@ -49,7 +48,7 @@ declare class SplitBlockBloomFilter {
      * from the provided Buffer
      * @param buffer a NodeJs Buffer containing bloom filter data for a row group.
      */
-    static from(buffer: Buffer, rowCount?: number): SplitBlockBloomFilter;
+    static from(buffer: Buffer, _rowCount?: number): SplitBlockBloomFilter;
     /**
      * @function getBlockIndex: get a block index to insert a hash value for
      * @param h the hash from which to derive a block index (?)
@@ -115,7 +114,7 @@ declare class SplitBlockBloomFilter {
     getFalsePositiveRate(): number;
     getNumDistinct(): number;
     getNumFilterBlocks(): number;
-    getFilter(): Array<Block>;
+    getFilter(): Block[];
     /**
      * @function  optNumFilterBytes
      * @description return the actual number of filter bytes set; if the option to numBytes

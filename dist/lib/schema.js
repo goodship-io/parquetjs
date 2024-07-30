@@ -28,7 +28,6 @@ const parquet_codec = __importStar(require("./codec"));
 const parquet_compression = __importStar(require("./compression"));
 const parquet_types = __importStar(require("./types"));
 const jsonSchema_1 = require("./jsonSchema");
-const PARQUET_COLUMN_KEY_SEPARATOR = '.';
 /**
  * A parquet file schema
  */
@@ -56,14 +55,14 @@ class ParquetSchema {
      */
     findField(path) {
         if (typeof path === 'string') {
-            path = path.split(",");
+            path = path.split(',');
         }
         else {
             path = path.slice(0); // clone array
         }
         let n = this.fields;
         for (; path.length > 1; path.shift()) {
-            let fields = n[path[0]]?.fields;
+            const fields = n[path[0]]?.fields;
             if (isDefined(fields)) {
                 n = fields;
             }
@@ -75,13 +74,13 @@ class ParquetSchema {
      */
     findFieldBranch(path) {
         if (typeof path === 'string') {
-            path = path.split(",");
+            path = path.split(',');
         }
-        let branch = [];
+        const branch = [];
         let n = this.fields;
         for (; path.length > 0; path.shift()) {
             branch.push(n[path[0]]);
-            let fields = n[path[0]].fields;
+            const fields = n[path[0]].fields;
             if (path.length > 1 && isDefined(fields)) {
                 n = fields;
             }
@@ -90,7 +89,6 @@ class ParquetSchema {
     }
 }
 exports.ParquetSchema = ParquetSchema;
-;
 function buildFields(schema, rLevelParentMax, dLevelParentMax, path) {
     if (!rLevelParentMax) {
         rLevelParentMax = 0;
@@ -101,9 +99,9 @@ function buildFields(schema, rLevelParentMax, dLevelParentMax, path) {
     if (!path) {
         path = [];
     }
-    let fieldList = {};
+    const fieldList = {};
     let fieldErrors = [];
-    for (let name in schema) {
+    for (const name in schema) {
         const opts = schema[name];
         /* field repetition type */
         const required = !opts.optional;
@@ -133,19 +131,19 @@ function buildFields(schema, rLevelParentMax, dLevelParentMax, path) {
                 isNested: true,
                 statistics: opts.statistics,
                 fieldCount: Object.keys(opts.fields).length,
-                fields: buildFields(opts.fields, rLevelMax, dLevelMax, path.concat(name))
+                fields: buildFields(opts.fields, rLevelMax, dLevelMax, path.concat(name)),
             };
             if (opts.type == 'LIST' || opts.type == 'MAP')
                 fieldList[name].originalType = opts.type;
             continue;
         }
-        let nameWithPath = (`${name}` || 'missing name');
+        let nameWithPath = `${name}` || 'missing name';
         if (path && path.length > 0) {
             nameWithPath = `${path}.${nameWithPath}`;
         }
         const typeDef = opts.type ? parquet_types.getParquetTypeDataObject(opts.type, opts) : undefined;
         if (!typeDef) {
-            fieldErrors.push(`Invalid parquet type: ${(opts.type || "missing type")}, for Column: ${nameWithPath}`);
+            fieldErrors.push(`Invalid parquet type: ${opts.type || 'missing type'}, for Column: ${nameWithPath}`);
             continue;
         }
         /* field encoding */
@@ -163,7 +161,7 @@ function buildFields(schema, rLevelParentMax, dLevelParentMax, path) {
         }
         if (typeDef.originalType === 'DECIMAL') {
             // Default scale to 0 per https://github.com/apache/parquet-format/blob/master/LogicalTypes.md#decimal
-            if (typeof opts.scale === "undefined")
+            if (typeof opts.scale === 'undefined')
                 opts.scale = 0;
             fieldErrors = fieldErrors.concat(errorsForDecimalOpts(typeDef.originalType, typeDef.primitiveType, opts, nameWithPath));
         }
@@ -181,7 +179,7 @@ function buildFields(schema, rLevelParentMax, dLevelParentMax, path) {
             scale: opts.scale,
             typeLength: opts.typeLength || typeDef.typeLength,
             rLevelMax: rLevelMax,
-            dLevelMax: dLevelMax
+            dLevelMax: dLevelMax,
         };
     }
     if (fieldErrors.length > 0) {
@@ -191,7 +189,7 @@ function buildFields(schema, rLevelParentMax, dLevelParentMax, path) {
 }
 function listFields(fields) {
     let list = [];
-    for (let k in fields) {
+    for (const k in fields) {
         list.push(fields[k]);
         const nestedFields = fields[k].fields;
         if (fields[k].isNested && isDefined(nestedFields)) {
@@ -211,10 +209,10 @@ function errorsForDecimalOpts(type, primitiveType, opts, columnName) {
     else if (!Number.isInteger(opts.precision)) {
         fieldErrors.push(`invalid schema for type: ${type}, for Column: ${columnName}, precision must be an integer`);
     }
-    else if (primitiveType === "INT64" && opts.precision > 18) {
+    else if (primitiveType === 'INT64' && opts.precision > 18) {
         fieldErrors.push(`invalid schema for type: ${type} and primitive type: ${primitiveType} for Column: ${columnName}, can not handle precision over 18`);
     }
-    if (typeof opts.scale === "undefined" || opts.scale < 0) {
+    if (typeof opts.scale === 'undefined' || opts.scale < 0) {
         fieldErrors.push(`invalid schema for type: ${type}, for Column: ${columnName}, scale is required to be 0 or greater`);
     }
     else if (!Number.isInteger(opts.scale)) {

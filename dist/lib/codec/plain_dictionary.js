@@ -26,7 +26,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.decodeValues = void 0;
 const rle = __importStar(require("./rle"));
 const decodeValues = function (type, cursor, count, opts) {
-    const bitWidth = cursor.buffer.slice(cursor.offset, cursor.offset + 1).readInt8(0);
+    const bitWidth = cursor.buffer.subarray(cursor.offset, cursor.offset + 1).readInt8(0);
     cursor.offset += 1;
     return rle.decodeValues(type, cursor, count, Object.assign({}, opts, { disableEnvelope: true, bitWidth }));
 };

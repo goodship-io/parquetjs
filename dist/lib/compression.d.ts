@@ -1,10 +1,7 @@
-/// <reference types="node" />
-interface PARQUET_COMPRESSION_METHODS {
-    [key: string]: {
-        deflate: (value: any) => Buffer | Promise<Buffer>;
-        inflate: (value: any) => Buffer | Promise<Buffer>;
-    };
-}
+type PARQUET_COMPRESSION_METHODS = Record<string, {
+    deflate: (value: any) => Buffer | Promise<Buffer>;
+    inflate: (value: any) => Buffer | Promise<Buffer>;
+}>;
 export declare const PARQUET_COMPRESSION_METHODS: PARQUET_COMPRESSION_METHODS;
 /**
  * Deflate a value using compression method `method`

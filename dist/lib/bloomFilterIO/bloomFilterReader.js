@@ -36,18 +36,18 @@ const filterColumnChunksWithBloomFilters = (columnChunkDataCollection) => {
     });
 };
 const toInteger = (buffer) => {
-    const integer = parseInt(buffer.toString("hex"), 16);
+    const integer = parseInt(buffer.toString('hex'), 16);
     if (integer >= Number.MAX_VALUE) {
-        throw Error("Number exceeds Number.MAX_VALUE: Godspeed");
+        throw Error('Number exceeds Number.MAX_VALUE: Godspeed');
     }
     return integer;
 };
 const parseBloomFilterOffsets = (ColumnChunkDataCollection) => {
     return ColumnChunkDataCollection.map(({ rowGroupIndex, column }) => {
-        const { bloom_filter_offset: bloomOffset, path_in_schema: pathInSchema, } = column.meta_data || {};
+        const { bloom_filter_offset: bloomOffset, path_in_schema: pathInSchema } = column.meta_data || {};
         return {
             offsetBytes: toInteger(bloomOffset.buffer),
-            columnName: pathInSchema.join(","),
+            columnName: pathInSchema.join(','),
             rowGroupIndex,
         };
     });
@@ -73,7 +73,7 @@ const getBloomFilterHeader = async (offsetBytes, envelopeReader) => {
     };
 };
 const readFilterData = async (offsetBytes, envelopeReader) => {
-    const { bloomFilterHeader, sizeOfBloomFilterHeader, } = await getBloomFilterHeader(offsetBytes, envelopeReader);
+    const { bloomFilterHeader, sizeOfBloomFilterHeader } = await getBloomFilterHeader(offsetBytes, envelopeReader);
     const { numBytes: filterByteSize } = bloomFilterHeader;
     try {
         const filterBlocksOffset = offsetBytes + sizeOfBloomFilterHeader;

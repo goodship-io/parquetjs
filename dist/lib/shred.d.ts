@@ -50,4 +50,4 @@ export declare const shredRecord: (schema: ParquetSchema, record: Record<string,
  *   }
  *
  */
-export declare const materializeRecords: (schema: ParquetSchema, buffer: RecordBuffer, records?: Array<Record<string, unknown>>) => Record<string, unknown>[];
+export declare const materializeRecords: (schema: ParquetSchema, buffer: RecordBuffer, records?: Record<string, unknown>[]) => Record<string, unknown>[];

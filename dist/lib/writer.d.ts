@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import stream from 'stream';
 import * as parquet_shredder from './shred';
 import * as parquet_util from './util';
@@ -44,7 +42,7 @@ export declare class ParquetWriter {
      * method twice on the same object or add any rows after the close() method has
      * been called
      */
-    close(callback?: Function): Promise<void>;
+    close(callback?: () => void): Promise<void>;
     /**
      * Add key<>value metadata to the file
      */
@@ -70,8 +68,8 @@ export declare class ParquetWriter {
  */
 export declare class ParquetEnvelopeWriter {
     schema: ParquetSchema;
-    write: Function;
-    close: Function;
+    write: (buf: Buffer) => void;
+    close: () => void;
     offset: Int64;
     rowCount: Int64;
     rowGroups: RowGroupExt[];
@@ -83,17 +81,17 @@ export declare class ParquetEnvelopeWriter {
      * Create a new parquet envelope writer that writes to the specified stream
      */
     static openStream(schema: ParquetSchema, outputStream: parquet_util.WriteStreamMinimal, opts: WriterOptions): Promise<ParquetEnvelopeWriter>;
-    constructor(schema: ParquetSchema, writeFn: Function, closeFn: Function, fileOffset: Int64, opts: WriterOptions);
-    writeSection(buf: Buffer): any;
+    constructor(schema: ParquetSchema, writeFn: (buf: Buffer) => void, closeFn: () => void, fileOffset: Int64, opts: WriterOptions);
+    writeSection(buf: Buffer): void;
     /**
      * Encode the parquet file header
      */
-    writeHeader(): any;
+    writeHeader(): void;
     /**
      * Encode a parquet row group. The records object should be created using the
      * shredRecord method
      */
-    writeRowGroup(records: parquet_shredder.RecordBuffer): Promise<any>;
+    writeRowGroup(records: parquet_shredder.RecordBuffer): Promise<void>;
     writeBloomFilters(): void;
     /**
      * Write the columnIndices and offsetIndices
@@ -102,7 +100,7 @@ export declare class ParquetEnvelopeWriter {
     /**
      * Write the parquet file footer
      */
-    writeFooter(userMetadata: Record<string, string>): any;
+    writeFooter(userMetadata: Record<string, string>): void;
     /**
      * Set the parquet data page size. The data page size controls the maximum
      * number of column values that are written to disk as a consecutive array
@@ -115,6 +113,6 @@ export declare class ParquetEnvelopeWriter {
 export declare class ParquetTransformer extends stream.Transform {
     writer: ParquetWriter;
     constructor(schema: ParquetSchema, opts?: {});
-    _transform(row: Record<string, unknown>, _encoding: string, callback: Function): void;
+    _transform(row: Record<string, unknown>, _encoding: string, callback: (err?: Error | null, data?: any) => void): void;
     _flush(callback: (foo: any, bar?: any) => any): void;
 }

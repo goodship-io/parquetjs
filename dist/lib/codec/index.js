@@ -23,7 +23,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PLAIN_DICTIONARY = exports.RLE = exports.PLAIN = void 0;
+exports.RLE_DICTIONARY = exports.PLAIN_DICTIONARY = exports.RLE = exports.PLAIN = void 0;
 exports.PLAIN = __importStar(require("./plain"));
 exports.RLE = __importStar(require("./rle"));
 exports.PLAIN_DICTIONARY = __importStar(require("./plain_dictionary"));
+exports.RLE_DICTIONARY = __importStar(require("./plain_dictionary"));

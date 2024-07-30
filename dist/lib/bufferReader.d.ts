@@ -1,7 +1,6 @@
-/// <reference types="node" />
-import { Statistics } from "../gen-nodejs/parquet_types";
-import { ParquetEnvelopeReader } from "./reader";
-import { FileMetaDataExt } from "./declare";
+import { Statistics } from '../gen-nodejs/parquet_types';
+import { ParquetEnvelopeReader } from './reader';
+import { FileMetaDataExt } from './declare';
 export interface BufferReaderOptions {
     maxSpan?: number;
     maxLength?: number;
@@ -21,7 +20,7 @@ export default class BufferReader {
     maxLength: number;
     queueWait: number;
     scheduled?: boolean;
-    queue: Array<BufferReaderQueueRow>;
+    queue: BufferReaderQueueRow[];
     envelopeReader: ParquetEnvelopeReader;
     constructor(envelopeReader: ParquetEnvelopeReader, options: BufferReaderOptions);
     read(offset: number, length: number): Promise<Buffer>;
