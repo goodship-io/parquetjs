@@ -4,5 +4,6 @@ node_modules
 npm-debug.log
 .nyc_output
 !test/test-files/*.parquet
+!test/reference-test/files/*.parquet
 examples/server/package-lock.json
 test/browser/*.js
